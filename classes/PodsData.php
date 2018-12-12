@@ -2533,7 +2533,7 @@ class PodsData {
         }
 
 	    // Single array handling
-	    if ( 1 == count( $field_value ) && $field_compare == 'ALL' ) {
+	    if ( 1 == @count( $field_value ) && $field_compare == 'ALL' ) {
 		    $field_compare = '=';
 	    }
 		// Empty array handling
