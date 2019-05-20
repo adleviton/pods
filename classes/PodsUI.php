@@ -4948,49 +4948,16 @@ class PodsUI {
 
 				if ( pods_is_admin( array( 'pods', 'pods_content' ) ) ) {
 					$restricted = false;
-				} else {
-					// Disable legacy check.
-					$author_restrict = false;
-
-					$pod = $this->pod;
-					if ( ! $pod->id() && $row ) {
-						$pod->fetch( $row );
-					}
-
-					// Check if the current user is the author of this item.
-					$author    = $pod->field( 'author', true );
-					$is_author = false;
-					if ( $author && (int) wp_get_current_user()->ID === (int) pods_v( 'ID', $author, 0 ) ) {
-						$is_author = true;
-					}
-
-					$cap_actions = array( $action );
-					if ( 'manage' === $action || 'reorder' === $action ) {
-						if ( ! in_array( 'edit', $this->actions_disabled, true ) ) {
-							$cap_actions[] = 'edit';
-						}
-						if ( ! in_array( 'delete', $this->actions_disabled, true ) ) {
-							$cap_actions[] = 'delete';
-						}
-					}
-
-					foreach ( $cap_actions as $cap ) {
-						if ( $is_author ) {
-							// Only need regular capability.
-							if ( current_user_can( 'pods_' . $cap . '_' . $this->pod->pod ) ) {
-								$restricted = false;
-								break;
-							}
-						} else {
-							// This item is created by another user so the "others" capability is required as well.
-							if (
-								current_user_can( 'pods_' . $cap . '_' . $this->pod->pod ) &&
-								current_user_can( 'pods_' . $cap . '_others_' . $this->pod->pod )
-							) {
-								$restricted = false;
-								break;
-							}
-						}
+				} elseif ( 'manage' === $action || 'reorder' === $action ) {
+					// if ( ! in_array( 'edit', $this->actions_disabled ) && ( current_user_can( 'pods_edit_' . $this->pod->pod ) || current_user_can( 'pods_edit_others_' . $this->pod->pod ) ) ) {
+		      if ( ! in_array( 'edit', $this->actions_disabled ) && current_user_can( 'pods_edit_others_' . $this->pod->pod ) ) {
+		        $restricted = false;
+		      // } elseif ( ! in_array( 'delete', $this->actions_disabled ) && ( current_user_can( 'pods_delete_' . $this->pod->pod ) || current_user_can( 'pods_delete_others_' . $this->pod->pod ) ) ) {
+		      } elseif ( ! in_array( 'delete', $this->actions_disabled ) && current_user_can( 'pods_delete_others_' . $this->pod->pod ) ) {
+		        $restricted = false;
+					} elseif ( current_user_can( 'pods_' . $action . '_' . $this->pod->pod ) || current_user_can( 'pods_' . $action . '_others_' . $this->pod->pod ) ) {
+						// $restricted = false;
+						$restricted = !empty($_GET['action']) && $_GET['action'] === 'reorder' ? true : false;
 					}
 				}
 
